@@ -22,6 +22,8 @@ export interface Gift {
   icon?: string;
   active: boolean;
   order: number;
+  max_quantity?: number;
+  purchased_count?: number;
   created_at?: string;
 }
 

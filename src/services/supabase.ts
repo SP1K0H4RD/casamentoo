@@ -14,38 +14,74 @@ export const isSupabaseConfigured = true;
 // ------------------------------------------------------------
 export const giftService = {
   async getAll(): Promise<Gift[]> {
-    const { data, error } = await supabase
-      .from('gifts')
-      .select('*')
-      .eq('active', true)
-      .order('order', { ascending: true });
+    const [giftsRes, txRes] = await Promise.all([
+      supabase
+        .from('gifts')
+        .select('*')
+        .eq('active', true)
+        .order('order', { ascending: true }),
+      supabase
+        .from('gift_transactions')
+        .select('gift_id')
+    ]);
 
-    if (error) {
-      console.error('Erro ao carregar presentes do Supabase:', error.message);
+    if (giftsRes.error) {
+      console.error('Erro ao carregar presentes do Supabase:', giftsRes.error.message);
       return [];
     }
 
-    return (data ?? []) as Gift[];
+    // Contabiliza quantas transações existem por presente
+    const txCountMap: Record<string, number> = {};
+    (txRes.data ?? []).forEach((t: { gift_id: string | null }) => {
+      if (t.gift_id) {
+        txCountMap[t.gift_id] = (txCountMap[t.gift_id] || 0) + 1;
+      }
+    });
+
+    return (giftsRes.data ?? []).map((gift: any) => ({
+      ...gift,
+      max_quantity: gift.max_quantity ?? 1,
+      purchased_count: txCountMap[gift.id] || 0,
+    })) as Gift[];
   },
 
   async getAllAdmin(): Promise<Gift[]> {
-    const { data, error } = await supabase
-      .from('gifts')
-      .select('*')
-      .order('order', { ascending: true });
+    const [giftsRes, txRes] = await Promise.all([
+      supabase
+        .from('gifts')
+        .select('*')
+        .order('order', { ascending: true }),
+      supabase
+        .from('gift_transactions')
+        .select('gift_id')
+    ]);
 
-    if (error) {
-      console.error('Erro ao carregar presentes (admin) do Supabase:', error.message);
+    if (giftsRes.error) {
+      console.error('Erro ao carregar presentes (admin) do Supabase:', giftsRes.error.message);
       return [];
     }
 
-    return (data ?? []) as Gift[];
+    const txCountMap: Record<string, number> = {};
+    (txRes.data ?? []).forEach((t: { gift_id: string | null }) => {
+      if (t.gift_id) {
+        txCountMap[t.gift_id] = (txCountMap[t.gift_id] || 0) + 1;
+      }
+    });
+
+    return (giftsRes.data ?? []).map((gift: any) => ({
+      ...gift,
+      max_quantity: gift.max_quantity ?? 1,
+      purchased_count: txCountMap[gift.id] || 0,
+    })) as Gift[];
   },
 
   async create(gift: Omit<Gift, 'id' | 'created_at'>): Promise<Gift> {
     const { data, error } = await supabase
       .from('gifts')
-      .insert([gift])
+      .insert([{
+        ...gift,
+        max_quantity: Number(gift.max_quantity || 1),
+      }])
       .select()
       .single();
 
@@ -57,9 +93,15 @@ export const giftService = {
   },
 
   async update(id: string, updates: Partial<Gift>): Promise<Gift> {
+    const sanitizedUpdates = { ...updates };
+    delete sanitizedUpdates.purchased_count;
+    if (sanitizedUpdates.max_quantity !== undefined) {
+      sanitizedUpdates.max_quantity = Number(sanitizedUpdates.max_quantity);
+    }
+
     const { data, error } = await supabase
       .from('gifts')
-      .update(updates)
+      .update(sanitizedUpdates)
       .eq('id', id)
       .select()
       .single();

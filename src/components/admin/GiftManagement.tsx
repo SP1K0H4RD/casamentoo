@@ -8,7 +8,14 @@ export default function GiftManagement() {
   const [gifts, setGifts] = useState<Gift[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<Gift | null>(null);
-  const [form, setForm] = useState({ name: '', description: '', value: 0, icon: 'heart', active: true });
+  const [form, setForm] = useState({
+    name: '',
+    description: '',
+    value: 0,
+    icon: 'heart',
+    active: true,
+    max_quantity: 1,
+  });
 
   useEffect(() => {
     loadGifts();
@@ -22,13 +29,22 @@ export default function GiftManagement() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (editing) {
-      await giftService.update(editing.id, { ...form, value: Number(form.value) });
+      await giftService.update(editing.id, {
+        ...form,
+        value: Number(form.value),
+        max_quantity: Math.max(1, Number(form.max_quantity || 1)),
+      });
     } else {
-      await giftService.create({ ...form, value: Number(form.value), order: gifts.length + 1 });
+      await giftService.create({
+        ...form,
+        value: Number(form.value),
+        max_quantity: Math.max(1, Number(form.max_quantity || 1)),
+        order: gifts.length + 1,
+      });
     }
     setShowForm(false);
     setEditing(null);
-    setForm({ name: '', description: '', value: 0, icon: 'heart', active: true });
+    setForm({ name: '', description: '', value: 0, icon: 'heart', active: true, max_quantity: 1 });
     loadGifts();
   };
 
@@ -40,6 +56,7 @@ export default function GiftManagement() {
       value: gift.value,
       icon: gift.icon || 'heart',
       active: gift.active,
+      max_quantity: gift.max_quantity ?? 1,
     });
     setShowForm(true);
   };
@@ -61,7 +78,11 @@ export default function GiftManagement() {
       <div className="flex items-center justify-between">
         <h3 className="font-serif text-xl text-wedding-charcoal">Gerenciar Presentes</h3>
         <button
-          onClick={() => { setShowForm(!showForm); setEditing(null); setForm({ name: '', description: '', value: 0, icon: 'heart', active: true }); }}
+          onClick={() => {
+            setShowForm(!showForm);
+            setEditing(null);
+            setForm({ name: '', description: '', value: 0, icon: 'heart', active: true, max_quantity: 1 });
+          }}
           className="flex items-center gap-2 px-4 py-2 bg-wedding-charcoal text-white rounded-lg text-sm hover:bg-wedding-charcoal-light transition-colors"
         >
           <Plus size={16} />
@@ -76,8 +97,8 @@ export default function GiftManagement() {
           className="bg-white rounded-xl p-6 shadow-sm border border-wedding-gold/10 space-y-4"
           onSubmit={handleSubmit}
         >
-          <div className="grid md:grid-cols-2 gap-4">
-            <div>
+          <div className="grid md:grid-cols-3 gap-4">
+            <div className="md:col-span-1">
               <label className="block text-sm text-wedding-warmgray mb-1">Nome</label>
               <input
                 required
@@ -95,6 +116,22 @@ export default function GiftManagement() {
                 onChange={(e) => setForm({ ...form, value: Number(e.target.value) })}
                 className="w-full px-4 py-2 border border-wedding-gold/20 rounded-lg focus:outline-none focus:border-wedding-gold"
               />
+            </div>
+            <div>
+              <label className="block text-sm text-wedding-warmgray mb-1">
+                Qtd. Permitida (Estoque)
+              </label>
+              <input
+                required
+                type="number"
+                min="1"
+                value={form.max_quantity}
+                onChange={(e) => setForm({ ...form, max_quantity: Number(e.target.value) })}
+                className="w-full px-4 py-2 border border-wedding-gold/20 rounded-lg focus:outline-none focus:border-wedding-gold"
+              />
+              <p className="text-[11px] text-wedding-warmgray mt-1">
+                1 = Exclusivo (único) | &gt; 1 = Permite vários compradores
+              </p>
             </div>
           </div>
           <div>
@@ -135,43 +172,70 @@ export default function GiftManagement() {
               <tr>
                 <th className="text-left px-6 py-3 text-sm font-medium text-wedding-warmgray">Nome</th>
                 <th className="text-left px-6 py-3 text-sm font-medium text-wedding-warmgray">Valor</th>
+                <th className="text-left px-6 py-3 text-sm font-medium text-wedding-warmgray">Presenteados / Limite</th>
                 <th className="text-left px-6 py-3 text-sm font-medium text-wedding-warmgray">Status</th>
                 <th className="text-right px-6 py-3 text-sm font-medium text-wedding-warmgray">Ações</th>
               </tr>
             </thead>
             <tbody>
-              {gifts.map((gift) => (
-                <tr key={gift.id} className="border-t border-wedding-gold/10">
-                  <td className="px-6 py-4">
-                    <p className="text-wedding-charcoal font-medium">{gift.name}</p>
-                    <p className="text-wedding-warmgray text-xs">{gift.description}</p>
-                  </td>
-                  <td className="px-6 py-4 text-wedding-charcoal">
-                    R$ {gift.value.toLocaleString('pt-BR')}
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className={`px-2 py-1 rounded-full text-xs ${gift.active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
-                      {gift.active ? 'Ativo' : 'Inativo'}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-right">
-                    <div className="flex items-center justify-end gap-2">
-                      <button onClick={() => handleToggle(gift)} className="p-2 hover:bg-wedding-cream rounded-lg transition-colors">
-                        {gift.active ? <Eye size={16} className="text-wedding-warmgray" /> : <EyeOff size={16} className="text-wedding-warmgray" />}
-                      </button>
-                      <button onClick={() => handleEdit(gift)} className="p-2 hover:bg-wedding-cream rounded-lg transition-colors">
-                        <Pencil size={16} className="text-wedding-warmgray" />
-                      </button>
-                      <button onClick={() => handleDelete(gift.id)} className="p-2 hover:bg-red-50 rounded-lg transition-colors">
-                        <Trash2 size={16} className="text-red-400" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
+              {gifts.map((gift) => {
+                const maxQty = gift.max_quantity ?? 1;
+                const purchased = gift.purchased_count ?? 0;
+                const isSoldOut = purchased >= maxQty;
+
+                return (
+                  <tr key={gift.id} className="border-t border-wedding-gold/10">
+                    <td className="px-6 py-4">
+                      <p className="text-wedding-charcoal font-medium">{gift.name}</p>
+                      <p className="text-wedding-warmgray text-xs">{gift.description}</p>
+                    </td>
+                    <td className="px-6 py-4 text-wedding-charcoal">
+                      R$ {gift.value.toLocaleString('pt-BR')}
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium text-wedding-charcoal">
+                          {purchased} / {maxQty}
+                        </span>
+                        {isSoldOut ? (
+                          <span className="px-2 py-0.5 rounded-full text-xs bg-red-100 text-red-700 font-medium">
+                            Esgotado
+                          </span>
+                        ) : maxQty === 1 ? (
+                          <span className="px-2 py-0.5 rounded-full text-xs bg-amber-50 text-amber-700 font-medium border border-amber-200">
+                            Exclusivo
+                          </span>
+                        ) : (
+                          <span className="px-2 py-0.5 rounded-full text-xs bg-green-50 text-green-700 font-medium">
+                            {maxQty - purchased} disp.
+                          </span>
+                        )}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className={`px-2 py-1 rounded-full text-xs ${gift.active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
+                        {gift.active ? 'Ativo' : 'Inativo'}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        <button onClick={() => handleToggle(gift)} className="p-2 hover:bg-wedding-cream rounded-lg transition-colors" title={gift.active ? 'Desativar' : 'Ativar'}>
+                          {gift.active ? <Eye size={16} className="text-wedding-warmgray" /> : <EyeOff size={16} className="text-wedding-warmgray" />}
+                        </button>
+                        <button onClick={() => handleEdit(gift)} className="p-2 hover:bg-wedding-cream rounded-lg transition-colors" title="Editar presente">
+                          <Pencil size={16} className="text-wedding-warmgray" />
+                        </button>
+                        <button onClick={() => handleDelete(gift.id)} className="p-2 hover:bg-red-50 rounded-lg transition-colors" title="Excluir presente">
+                          <Trash2 size={16} className="text-red-400" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
               {gifts.length === 0 && (
                 <tr>
-                  <td colSpan={4} className="px-6 py-8 text-center text-wedding-warmgray">
+                  <td colSpan={5} className="px-6 py-8 text-center text-wedding-warmgray">
                     Nenhum presente cadastrado.
                   </td>
                 </tr>

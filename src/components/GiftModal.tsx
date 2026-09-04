@@ -52,12 +52,18 @@ export default function GiftModal({ gift, onClose }: GiftModalProps) {
                   </p>
                 </div>
 
-                <button
-                  onClick={() => setStep('pix')}
-                  className="w-full py-4 bg-wedding-charcoal text-white rounded-xl font-medium hover:bg-wedding-charcoal-light transition-colors"
-                >
-                  Presentear
-                </button>
+                {(gift.purchased_count ?? 0) >= (gift.max_quantity ?? 1) ? (
+                  <div className="text-center p-4 bg-amber-50 border border-amber-200 rounded-xl">
+                    <p className="text-amber-800 text-sm font-medium">Este presente já foi esgotado!</p>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => setStep('pix')}
+                    className="w-full py-4 bg-wedding-charcoal text-white rounded-xl font-medium hover:bg-wedding-charcoal-light transition-colors"
+                  >
+                    Presentear
+                  </button>
+                )}
               </div>
             ) : (
               <PixPayment gift={gift} onClose={onClose} />

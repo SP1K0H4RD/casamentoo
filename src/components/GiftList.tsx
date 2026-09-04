@@ -104,34 +104,72 @@ export default function GiftList() {
           </div>
         ) : (
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {gifts.map((gift, index) => (
-              <motion.div
-                key={gift.id}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: index * 0.08 }}
-                whileHover={{ y: -4 }}
-                className="bg-white rounded-3xl p-6 shadow-sm border border-wedding-gold/20 hover:border-wedding-gold/40 hover:shadow-lg transition-all cursor-pointer flex flex-col justify-between"
-                onClick={() => setSelectedGift(gift)}
-              >
-                <div>
-                  <div className="w-12 h-12 rounded-2xl bg-wedding-gold/10 flex items-center justify-center text-wedding-gold mb-4">
-                    {iconMap[gift.icon || 'heart']}
+            {gifts.map((gift, index) => {
+              const maxQty = gift.max_quantity ?? 1;
+              const purchased = gift.purchased_count ?? 0;
+              const isSoldOut = purchased >= maxQty;
+
+              return (
+                <motion.div
+                  key={gift.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, delay: index * 0.08 }}
+                  whileHover={isSoldOut ? {} : { y: -4 }}
+                  className={`bg-white rounded-3xl p-6 shadow-sm border transition-all flex flex-col justify-between relative overflow-hidden ${
+                    isSoldOut
+                      ? 'opacity-40 border-gray-300 bg-gray-50/70 cursor-not-allowed select-none'
+                      : 'border-wedding-gold/20 hover:border-wedding-gold/40 hover:shadow-lg cursor-pointer'
+                  }`}
+                  onClick={() => {
+                    if (!isSoldOut) {
+                      setSelectedGift(gift);
+                    }
+                  }}
+                >
+                  {/* BADGE DE ESGOTADO / QUANTIDADE */}
+                  {isSoldOut ? (
+                    <div className="absolute top-4 right-4 bg-gray-800/85 text-white px-3 py-1 rounded-full text-[11px] font-semibold tracking-wider uppercase shadow-sm flex items-center gap-1.5">
+                      <span>🔒</span> Já Presenteado
+                    </div>
+                  ) : maxQty > 1 ? (
+                    <div className="absolute top-4 right-4 bg-wedding-cream text-wedding-charcoal/80 border border-wedding-gold/30 px-2.5 py-0.5 rounded-full text-[10px] font-medium tracking-wide">
+                      {maxQty - purchased} de {maxQty} disponíveis
+                    </div>
+                  ) : null}
+
+                  <div>
+                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-4 ${
+                      isSoldOut ? 'bg-gray-200 text-gray-400' : 'bg-wedding-gold/10 text-wedding-gold'
+                    }`}>
+                      {iconMap[gift.icon || 'heart']}
+                    </div>
+                    <h4 className={`font-serif text-lg font-semibold ${isSoldOut ? 'text-gray-500 line-through' : 'text-wedding-charcoal'}`}>
+                      {gift.name}
+                    </h4>
+                    <p className={`text-xs sm:text-sm mt-2 leading-relaxed ${isSoldOut ? 'text-gray-400' : 'text-wedding-warmgray'}`}>
+                      {isSoldOut ? 'Este presente já foi escolhido por alguém especial. Obrigado pelo carinho!' : gift.description}
+                    </p>
                   </div>
-                  <h4 className="font-serif text-lg font-semibold text-wedding-charcoal">{gift.name}</h4>
-                  <p className="text-wedding-warmgray text-xs sm:text-sm mt-2 leading-relaxed">{gift.description}</p>
-                </div>
-                <div className="mt-6 pt-4 border-t border-wedding-gold/15 flex items-center justify-between">
-                  <span className="font-serif text-xl font-bold text-wedding-charcoal">
-                    R$ {gift.value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                  </span>
-                  <button className="px-4 py-2 bg-wedding-charcoal text-white text-xs font-medium rounded-xl hover:bg-wedding-charcoal-light transition-colors">
-                    Presentear
-                  </button>
-                </div>
-              </motion.div>
-            ))}
+
+                  <div className="mt-6 pt-4 border-t border-wedding-gold/15 flex items-center justify-between">
+                    <span className={`font-serif text-xl font-bold ${isSoldOut ? 'text-gray-400' : 'text-wedding-charcoal'}`}>
+                      R$ {gift.value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                    </span>
+                    {isSoldOut ? (
+                      <span className="px-4 py-2 bg-gray-300 text-gray-600 text-xs font-semibold rounded-xl cursor-not-allowed">
+                        Esgotado
+                      </span>
+                    ) : (
+                      <button className="px-4 py-2 bg-wedding-charcoal text-white text-xs font-medium rounded-xl hover:bg-wedding-charcoal-light transition-colors">
+                        Presentear
+                      </button>
+                    )}
+                  </div>
+                </motion.div>
+              );
+            })}
           </div>
         )}
       </div>

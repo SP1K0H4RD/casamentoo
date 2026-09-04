@@ -3,6 +3,10 @@
 -- Execute este script completo no SQL Editor do seu painel Supabase
 -- ============================================================
 
+-- CASO A TABELA JÁ EXISTA E QUEIRA APENAS ADICIONAR A COLUNA DE ESTOQUE/QUANTIDADE:
+-- ALTER TABLE public.gifts ADD COLUMN IF NOT EXISTS max_quantity INTEGER DEFAULT 1;
+-- UPDATE public.gifts SET max_quantity = 1 WHERE max_quantity IS NULL;
+
 -- 1. EXTENSÕES
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
@@ -15,9 +19,13 @@ CREATE TABLE IF NOT EXISTS public.gifts (
     image TEXT,
     icon TEXT DEFAULT 'heart',
     active BOOLEAN DEFAULT true,
+    max_quantity INTEGER DEFAULT 1,
     "order" INTEGER DEFAULT 0,
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
+
+-- Garante que a coluna existe mesmo se a tabela já foi criada anteriormente
+ALTER TABLE public.gifts ADD COLUMN IF NOT EXISTS max_quantity INTEGER DEFAULT 1;
 
 CREATE INDEX IF NOT EXISTS idx_gifts_active ON public.gifts(active);
 CREATE INDEX IF NOT EXISTS idx_gifts_order ON public.gifts("order");
@@ -81,16 +89,14 @@ CREATE POLICY "messages_all_policy" ON public.guest_messages FOR ALL USING (true
 
 -- ============================================================
 -- 6. DADOS INICIAIS DE PRESENTES
--- Limpa presentes antigos e insere a lista oficial do casal
 -- ============================================================
 
--- Apaga tudo e insere do zero (garante consistência)
-TRUNCATE TABLE public.gifts RESTART IDENTITY CASCADE;
-
-INSERT INTO public.gifts (name, description, value, icon, "order", active) VALUES
-  ('Lua de Mel dos Sonhos',      'Contribua para momentos inesquecíveis na viagem de lua de mel dos noivos.',      150, 'plane',    1, true),
-  ('Diária em Hotel Romântico',  'Uma estadia especial para descanso e celebração do casal.',                       250, 'hotel',    2, true),
-  ('Jantar Romântico a Dois',    'Uma experiência gastronômica à luz de velas.',                                    180, 'utensils', 3, true),
-  ('Café da Manhã Especial',     'Um delicioso café da manhã para começar o novo ciclo com amor.',                   90, 'coffee',   4, true),
-  ('Passeio & Experiência a Dois','Passeios e aventuras para guardar para sempre na memória.',                      350, 'cloud',    5, true),
-  ('Dia de Spa & Relaxamento',   'Um momento de paz e renovação para os noivos.',                                   220, 'heart',    6, true);
+-- Se quiser reinserir os presentes padrão com suporte a quantidade:
+-- TRUNCATE TABLE public.gifts RESTART IDENTITY CASCADE;
+-- INSERT INTO public.gifts (name, description, value, icon, "order", active, max_quantity) VALUES
+--   ('Lua de Mel dos Sonhos',       'Contribua para momentos inesquecíveis na viagem de lua de mel dos noivos.',      150, 'plane',    1, true, 1),
+--   ('Diária em Hotel Romântico',   'Uma estadia especial para descanso e celebração do casal.',                       250, 'hotel',    2, true, 1),
+--   ('Jantar Romântico a Dois',     'Uma experiência gastronômica à luz de velas.',                                    180, 'utensils', 3, true, 1),
+--   ('Café da Manhã Especial',      'Um delicioso café da manhã para começar o novo ciclo com amor.',                   90, 'coffee',   4, true, 1),
+--   ('Passeio & Experiência a Dois', 'Passeios e aventuras para guardar para sempre na memória.',                      350, 'cloud',    5, true, 1),
+--   ('Dia de Spa & Relaxamento',    'Um momento de paz e renovação para os noivos.',                                   220, 'heart',    6, true, 1);
