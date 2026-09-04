@@ -1,20 +1,17 @@
 -- ============================================================
--- SCHEMA SUPABASE - SITE DE CASAMENTO
--- Execute estes comandos no SQL Editor do Supabase
+-- SCRIPT COMPLETO DE CONFIGURAÇÃO DO BANCO SUPABASE
+-- Execute este script completo no SQL Editor do seu painel Supabase
 -- ============================================================
 
--- Habilitar RLS em todas as tabelas
--- As políticas abaixo são um ponto de partida.
--- Em produção, ajuste conforme suas necessidades de segurança.
+-- 1. EXTENSÕES
+CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
--- ============================================================
--- TABELA: gifts (Presentes simbólicos)
--- ============================================================
-CREATE TABLE IF NOT EXISTS gifts (
+-- 2. TABELA: gifts (Presentes da Lista de Casamento)
+CREATE TABLE IF NOT EXISTS public.gifts (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     name TEXT NOT NULL,
-    description TEXT NOT NULL,
-    value NUMERIC(10,2) NOT NULL,
+    description TEXT NOT NULL DEFAULT '',
+    value NUMERIC(10,2) NOT NULL DEFAULT 0,
     image TEXT,
     icon TEXT DEFAULT 'heart',
     active BOOLEAN DEFAULT true,
@@ -22,33 +19,19 @@ CREATE TABLE IF NOT EXISTS gifts (
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Índices
-CREATE INDEX idx_gifts_active ON gifts(active);
-CREATE INDEX idx_gifts_order ON gifts("order");
+CREATE INDEX IF NOT EXISTS idx_gifts_active ON public.gifts(active);
+CREATE INDEX IF NOT EXISTS idx_gifts_order ON public.gifts("order");
 
--- Política RLS (leitura pública, escrita apenas admin)
-ALTER TABLE gifts ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.gifts ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "gifts_all_policy" ON public.gifts;
+CREATE POLICY "gifts_all_policy" ON public.gifts FOR ALL USING (true) WITH CHECK (true);
 
-CREATE POLICY "gifts_select_public" ON gifts
-    FOR SELECT USING (true);
-
-CREATE POLICY "gifts_insert_admin" ON gifts
-    FOR INSERT WITH CHECK (auth.role() = 'authenticated');
-
-CREATE POLICY "gifts_update_admin" ON gifts
-    FOR UPDATE USING (auth.role() = 'authenticated');
-
-CREATE POLICY "gifts_delete_admin" ON gifts
-    FOR DELETE USING (auth.role() = 'authenticated');
-
--- ============================================================
--- TABELA: gift_transactions (Contribuições via PIX)
--- ============================================================
-CREATE TABLE IF NOT EXISTS gift_transactions (
+-- 3. TABELA: gift_transactions (Contribuições e Pagamentos PIX)
+CREATE TABLE IF NOT EXISTS public.gift_transactions (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     guest_name TEXT NOT NULL,
     guest_email TEXT,
-    gift_id UUID REFERENCES gifts(id) ON DELETE SET NULL,
+    gift_id UUID REFERENCES public.gifts(id) ON DELETE SET NULL,
     gift_name TEXT NOT NULL,
     amount NUMERIC(10,2) NOT NULL,
     payment_method TEXT DEFAULT 'pix',
@@ -56,66 +39,58 @@ CREATE TABLE IF NOT EXISTS gift_transactions (
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Índices
-CREATE INDEX idx_transactions_status ON gift_transactions(status);
-CREATE INDEX idx_transactions_gift ON gift_transactions(gift_id);
+CREATE INDEX IF NOT EXISTS idx_transactions_status ON public.gift_transactions(status);
+CREATE INDEX IF NOT EXISTS idx_transactions_created_at ON public.gift_transactions(created_at DESC);
 
--- Política RLS
-ALTER TABLE gift_transactions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.gift_transactions ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "transactions_all_policy" ON public.gift_transactions;
+CREATE POLICY "transactions_all_policy" ON public.gift_transactions FOR ALL USING (true) WITH CHECK (true);
 
-CREATE POLICY "transactions_select_admin" ON gift_transactions
-    FOR SELECT USING (auth.role() = 'authenticated');
-
-CREATE POLICY "transactions_insert_public" ON gift_transactions
-    FOR INSERT WITH CHECK (true);
-
-CREATE POLICY "transactions_update_admin" ON gift_transactions
-    FOR UPDATE USING (auth.role() = 'authenticated');
-
--- ============================================================
--- TABELA: rsvps (Confirmações de presença)
--- ============================================================
-CREATE TABLE IF NOT EXISTS rsvps (
+-- 4. TABELA: rsvps (Confirmações de Presença)
+CREATE TABLE IF NOT EXISTS public.rsvps (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     guest_name TEXT NOT NULL,
     phone TEXT,
     guests_count INTEGER DEFAULT 1,
+    companions JSONB DEFAULT '[]'::jsonb,
     notes TEXT,
     confirmed BOOLEAN DEFAULT true,
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Índices
-CREATE INDEX idx_rsvps_confirmed ON rsvps(confirmed);
+CREATE INDEX IF NOT EXISTS idx_rsvps_confirmed ON public.rsvps(confirmed);
+CREATE INDEX IF NOT EXISTS idx_rsvps_created_at ON public.rsvps(created_at DESC);
 
--- Política RLS
-ALTER TABLE rsvps ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.rsvps ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "rsvps_all_policy" ON public.rsvps;
+CREATE POLICY "rsvps_all_policy" ON public.rsvps FOR ALL USING (true) WITH CHECK (true);
 
-CREATE POLICY "rsvps_select_admin" ON rsvps
-    FOR SELECT USING (auth.role() = 'authenticated');
+-- 5. TABELA: guest_messages (Mural de Recados)
+CREATE TABLE IF NOT EXISTS public.guest_messages (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    name TEXT NOT NULL,
+    message TEXT NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
 
-CREATE POLICY "rsvps_insert_public" ON rsvps
-    FOR INSERT WITH CHECK (true);
+CREATE INDEX IF NOT EXISTS idx_guest_messages_created ON public.guest_messages(created_at DESC);
+
+ALTER TABLE public.guest_messages ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "messages_all_policy" ON public.guest_messages;
+CREATE POLICY "messages_all_policy" ON public.guest_messages FOR ALL USING (true) WITH CHECK (true);
 
 -- ============================================================
--- VIEW: Resumo administrativo
+-- 6. DADOS INICIAIS DE PRESENTES
+-- Limpa presentes antigos e insere a lista oficial do casal
 -- ============================================================
-CREATE OR REPLACE VIEW admin_summary AS
-SELECT
-    (SELECT COUNT(*) FROM rsvps WHERE confirmed = true) AS guests_confirmed,
-    (SELECT COALESCE(SUM(guests_count + 1), 0) FROM rsvps WHERE confirmed = true) AS total_people,
-    (SELECT COUNT(*) FROM gift_transactions) AS gifts_registered,
-    (SELECT COALESCE(SUM(amount), 0) FROM gift_transactions WHERE status = 'confirmed') AS pix_total;
 
--- ============================================================
--- DADOS INICIAIS (opcional - descomente se desejar)
--- ============================================================
-/*
-INSERT INTO gifts (name, description, value, icon, "order") VALUES
-('Lua de Mel', 'Ajude os noivos a viverem uma lua de mel inesquecível.', 100, 'plane', 1),
-('Uma noite especial', 'Uma noite em um hotel luxuoso para os noivos.', 250, 'hotel', 2),
-('Jantar romântico', 'Um jantar à luz de velas em um restaurante especial.', 150, 'utensils', 3),
-('Café da manhã na cama', 'Um café da manhã especial para começar o dia com amor.', 80, 'coffee', 4),
-('Passeio de balão', 'Uma experiência única e inesquecível nas alturas.', 500, 'cloud', 5),
-('Sessão de spa', 'Um dia de relaxamento e cuidados para o casal.', 300, 'heart', 6);
-*/
+-- Apaga tudo e insere do zero (garante consistência)
+TRUNCATE TABLE public.gifts RESTART IDENTITY CASCADE;
+
+INSERT INTO public.gifts (name, description, value, icon, "order", active) VALUES
+  ('Lua de Mel dos Sonhos',      'Contribua para momentos inesquecíveis na viagem de lua de mel dos noivos.',      150, 'plane',    1, true),
+  ('Diária em Hotel Romântico',  'Uma estadia especial para descanso e celebração do casal.',                       250, 'hotel',    2, true),
+  ('Jantar Romântico a Dois',    'Uma experiência gastronômica à luz de velas.',                                    180, 'utensils', 3, true),
+  ('Café da Manhã Especial',     'Um delicioso café da manhã para começar o novo ciclo com amor.',                   90, 'coffee',   4, true),
+  ('Passeio & Experiência a Dois','Passeios e aventuras para guardar para sempre na memória.',                      350, 'cloud',    5, true),
+  ('Dia de Spa & Relaxamento',   'Um momento de paz e renovação para os noivos.',                                   220, 'heart',    6, true);
