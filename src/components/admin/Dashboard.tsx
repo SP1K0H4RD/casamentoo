@@ -2,14 +2,16 @@ import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { rsvpService, paymentService, giftService } from '../../services/supabase';
 import type { RSVP, GiftTransaction } from '../../types';
-import { Users, Gift as GiftIcon, DollarSign, TrendingUp } from 'lucide-react';
+import { Users, DollarSign, TrendingUp, ShoppingBag } from 'lucide-react';
 
 export default function Dashboard() {
   const [stats, setStats] = useState({
     guestsConfirmed: 0,
     totalPeople: 0,
-    giftsRegistered: 0,
+    storeGiftsPurchased: 0,
+    totalGiftsAvailable: 0,
     pixTotal: 0,
+    pixCount: 0,
   });
 
   useEffect(() => {
@@ -22,14 +24,23 @@ export default function Dashboard() {
 
       const confirmedRsvps = rsvps.filter((r: RSVP) => r.confirmed);
       const totalPeople = confirmedRsvps.reduce((sum: number, r: RSVP) => sum + (r.guests_count || 1), 0);
-      const confirmedTransactions = transactions.filter((t: GiftTransaction) => t.status === 'confirmed');
-      const pixTotal = confirmedTransactions.reduce((sum: number, t: GiftTransaction) => sum + t.amount, 0);
+
+      const isPix = (t: GiftTransaction) =>
+        t.payment_method === 'pix' || t.gift_id === 'pix-special' || (!t.gift_id && t.payment_method !== 'store_link');
+
+      const pixTransactions = transactions.filter(isPix);
+      const confirmedPix = pixTransactions.filter((t: GiftTransaction) => t.status === 'confirmed');
+      const pixTotal = confirmedPix.reduce((sum: number, t: GiftTransaction) => sum + (Number(t.amount) || 0), 0);
+
+      const storeGiftTransactions = transactions.filter((t: GiftTransaction) => !isPix(t));
 
       setStats({
         guestsConfirmed: confirmedRsvps.length,
         totalPeople,
-        giftsRegistered: gifts.length || transactions.length,
+        storeGiftsPurchased: storeGiftTransactions.length,
+        totalGiftsAvailable: gifts.length,
         pixTotal,
+        pixCount: confirmedPix.length,
       });
     };
 
@@ -39,8 +50,8 @@ export default function Dashboard() {
   const cards = [
     { label: 'Convidados confirmados', value: stats.guestsConfirmed, icon: Users },
     { label: 'Total de pessoas', value: stats.totalPeople, icon: TrendingUp },
-    { label: 'Presentes disponíveis', value: stats.giftsRegistered, icon: GiftIcon },
-    { label: 'PIX arrecadado', value: `R$ ${stats.pixTotal.toLocaleString('pt-BR')}`, icon: DollarSign },
+    { label: 'PIX arrecadado', value: `R$ ${stats.pixTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`, icon: DollarSign },
+    { label: 'Presentes comprados', value: `${stats.storeGiftsPurchased} de ${stats.totalGiftsAvailable} itens`, icon: ShoppingBag },
   ];
 
   return (

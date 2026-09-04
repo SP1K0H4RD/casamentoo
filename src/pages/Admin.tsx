@@ -8,7 +8,7 @@ import GiftManagement from '../components/admin/GiftManagement';
 import PaymentManagement from '../components/admin/PaymentManagement';
 import MessageManagement from '../components/admin/MessageManagement';
 import Charts from '../components/admin/Charts';
-import { LayoutDashboard, Users, Gift, CreditCard, MessageSquareHeart, BarChart3, LogOut, Menu, X } from 'lucide-react';
+import { LayoutDashboard, Users, Gift, Wallet, MessageSquareHeart, BarChart3, LogOut, Menu, X } from 'lucide-react';
 
 type Tab = 'dashboard' | 'guests' | 'gifts' | 'payments' | 'messages' | 'charts';
 
@@ -16,7 +16,7 @@ const tabs: { id: Tab; label: string; icon: React.ElementType }[] = [
   { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { id: 'guests', label: 'Convidados', icon: Users },
   { id: 'gifts', label: 'Presentes', icon: Gift },
-  { id: 'payments', label: 'PIX', icon: CreditCard },
+  { id: 'payments', label: 'Arrecadações', icon: Wallet },
   { id: 'messages', label: 'Recados', icon: MessageSquareHeart },
   { id: 'charts', label: 'Gráficos', icon: BarChart3 },
 ];
