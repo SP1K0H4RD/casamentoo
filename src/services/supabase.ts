@@ -80,6 +80,7 @@ export const giftService = {
       .from('gifts')
       .insert([{
         ...gift,
+        link: gift.link || null,
         max_quantity: Number(gift.max_quantity || 1),
       }])
       .select()
@@ -97,6 +98,9 @@ export const giftService = {
     delete sanitizedUpdates.purchased_count;
     if (sanitizedUpdates.max_quantity !== undefined) {
       sanitizedUpdates.max_quantity = Number(sanitizedUpdates.max_quantity);
+    }
+    if (sanitizedUpdates.link !== undefined) {
+      sanitizedUpdates.link = sanitizedUpdates.link || null;
     }
 
     const { data, error } = await supabase
@@ -173,7 +177,7 @@ export const rsvpService = {
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export const paymentService = {
-  async create(transaction: Omit<GiftTransaction, 'id' | 'created_at' | 'status'>): Promise<GiftTransaction> {
+  async create(transaction: Omit<GiftTransaction, 'id' | 'created_at' | 'status'> & { status?: 'pending' | 'confirmed' }): Promise<GiftTransaction> {
     const giftId = transaction.gift_id && UUID_REGEX.test(transaction.gift_id) ? transaction.gift_id : null;
 
     const { data, error } = await supabase
@@ -185,8 +189,8 @@ export const paymentService = {
           gift_id: giftId,
           gift_name: transaction.gift_name,
           amount: transaction.amount,
-          payment_method: transaction.payment_method || 'pix',
-          status: 'pending',
+          payment_method: transaction.payment_method || 'store_link',
+          status: transaction.status || 'confirmed',
         },
       ])
       .select()

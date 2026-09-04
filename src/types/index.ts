@@ -20,6 +20,7 @@ export interface Gift {
   value: number;
   image?: string;
   icon?: string;
+  link?: string | null;
   active: boolean;
   order: number;
   max_quantity?: number;
@@ -34,7 +35,7 @@ export interface GiftTransaction {
   gift_id: string;
   gift_name: string;
   amount: number;
-  payment_method: 'pix';
+  payment_method: 'pix' | 'store_link' | string;
   status: 'pending' | 'confirmed';
   created_at: string;
 }

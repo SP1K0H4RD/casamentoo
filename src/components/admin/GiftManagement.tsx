@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { giftService } from '../../services/supabase';
 import type { Gift } from '../../types';
-import { Plus, Pencil, Trash2, Eye, EyeOff } from 'lucide-react';
+import { Plus, Pencil, Trash2, Eye, EyeOff, ExternalLink, Link as LinkIcon } from 'lucide-react';
 
 export default function GiftManagement() {
   const [gifts, setGifts] = useState<Gift[]>([]);
@@ -12,6 +12,7 @@ export default function GiftManagement() {
     name: '',
     description: '',
     value: 0,
+    link: '',
     icon: 'heart',
     active: true,
     max_quantity: 1,
@@ -32,19 +33,21 @@ export default function GiftManagement() {
       await giftService.update(editing.id, {
         ...form,
         value: Number(form.value),
+        link: form.link.trim() || undefined,
         max_quantity: Math.max(1, Number(form.max_quantity || 1)),
       });
     } else {
       await giftService.create({
         ...form,
         value: Number(form.value),
+        link: form.link.trim() || undefined,
         max_quantity: Math.max(1, Number(form.max_quantity || 1)),
         order: gifts.length + 1,
       });
     }
     setShowForm(false);
     setEditing(null);
-    setForm({ name: '', description: '', value: 0, icon: 'heart', active: true, max_quantity: 1 });
+    setForm({ name: '', description: '', value: 0, link: '', icon: 'heart', active: true, max_quantity: 1 });
     loadGifts();
   };
 
@@ -54,6 +57,7 @@ export default function GiftManagement() {
       name: gift.name,
       description: gift.description,
       value: gift.value,
+      link: gift.link || '',
       icon: gift.icon || 'heart',
       active: gift.active,
       max_quantity: gift.max_quantity ?? 1,
@@ -81,7 +85,7 @@ export default function GiftManagement() {
           onClick={() => {
             setShowForm(!showForm);
             setEditing(null);
-            setForm({ name: '', description: '', value: 0, icon: 'heart', active: true, max_quantity: 1 });
+            setForm({ name: '', description: '', value: 0, link: '', icon: 'heart', active: true, max_quantity: 1 });
           }}
           className="flex items-center gap-2 px-4 py-2 bg-wedding-charcoal text-white rounded-lg text-sm hover:bg-wedding-charcoal-light transition-colors"
         >
@@ -99,7 +103,7 @@ export default function GiftManagement() {
         >
           <div className="grid md:grid-cols-3 gap-4">
             <div className="md:col-span-1">
-              <label className="block text-sm text-wedding-warmgray mb-1">Nome</label>
+              <label className="block text-sm text-wedding-warmgray mb-1">Nome *</label>
               <input
                 required
                 value={form.name}
@@ -108,7 +112,7 @@ export default function GiftManagement() {
               />
             </div>
             <div>
-              <label className="block text-sm text-wedding-warmgray mb-1">Valor (R$)</label>
+              <label className="block text-sm text-wedding-warmgray mb-1">Valor Sugerido (R$)</label>
               <input
                 required
                 type="number"
@@ -130,10 +134,28 @@ export default function GiftManagement() {
                 className="w-full px-4 py-2 border border-wedding-gold/20 rounded-lg focus:outline-none focus:border-wedding-gold"
               />
               <p className="text-[11px] text-wedding-warmgray mt-1">
-                1 = Exclusivo (único) | &gt; 1 = Permite vários compradores
+                1 = Exclusivo (único) | &gt; 1 = Vários compradores
               </p>
             </div>
           </div>
+
+          <div>
+            <label className="block text-sm text-wedding-warmgray mb-1 flex items-center gap-1.5">
+              <LinkIcon size={14} className="text-wedding-gold" />
+              <span>Link da Loja / Produto (URL)</span>
+            </label>
+            <input
+              type="url"
+              placeholder="https://www.amazon.com.br/... ou link da loja onde comprar"
+              value={form.link}
+              onChange={(e) => setForm({ ...form, link: e.target.value })}
+              className="w-full px-4 py-2 border border-wedding-gold/20 rounded-lg focus:outline-none focus:border-wedding-gold text-sm"
+            />
+            <p className="text-[11px] text-wedding-warmgray mt-1">
+              O convidado clicará neste link para ser redirecionado à página da loja e comprar o presente.
+            </p>
+          </div>
+
           <div>
             <label className="block text-sm text-wedding-warmgray mb-1">Descrição</label>
             <textarea
@@ -186,7 +208,21 @@ export default function GiftManagement() {
                 return (
                   <tr key={gift.id} className="border-t border-wedding-gold/10">
                     <td className="px-6 py-4">
-                      <p className="text-wedding-charcoal font-medium">{gift.name}</p>
+                      <div className="flex items-center gap-2">
+                        <p className="text-wedding-charcoal font-medium">{gift.name}</p>
+                        {gift.link && (
+                          <a
+                            href={gift.link.startsWith('http') ? gift.link : `https://${gift.link}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 text-[11px] text-wedding-gold hover:text-wedding-gold-dark font-medium bg-amber-50 px-2 py-0.5 rounded border border-wedding-gold/30"
+                            title="Abrir link da loja"
+                          >
+                            <span>Loja</span>
+                            <ExternalLink size={10} />
+                          </a>
+                        )}
+                      </div>
                       <p className="text-wedding-warmgray text-xs">{gift.description}</p>
                     </td>
                     <td className="px-6 py-4 text-wedding-charcoal">

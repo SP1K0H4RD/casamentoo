@@ -21,11 +21,14 @@ export default function GiftList() {
   const [isPixPodiumOpen, setIsPixPodiumOpen] = useState(false);
   const [loading, setLoading] = useState(true);
 
+  const loadGifts = async () => {
+    const data = await giftService.getAll();
+    setGifts(data);
+    setLoading(false);
+  };
+
   useEffect(() => {
-    giftService.getAll().then((data) => {
-      setGifts(data);
-      setLoading(false);
-    });
+    loadGifts();
   }, []);
 
   return (
@@ -181,7 +184,13 @@ export default function GiftList() {
 
       {/* INDIVIDUAL GIFT MODAL */}
       {selectedGift && (
-        <GiftModal gift={selectedGift} onClose={() => setSelectedGift(null)} />
+        <GiftModal
+          gift={selectedGift}
+          onClose={() => setSelectedGift(null)}
+          onSuccess={() => {
+            loadGifts();
+          }}
+        />
       )}
     </section>
   );
