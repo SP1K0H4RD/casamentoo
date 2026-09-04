@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { paymentService } from '../../services/supabase';
 import type { GiftTransaction } from '../../types';
-import { Search, CheckCircle, Clock } from 'lucide-react';
+import { Search, CheckCircle, Clock, Trash2 } from 'lucide-react';
 
 export default function PaymentManagement() {
   const [transactions, setTransactions] = useState<GiftTransaction[]>([]);
@@ -22,8 +22,15 @@ export default function PaymentManagement() {
     loadTransactions();
   };
 
+  const handleDelete = async (id: string) => {
+    if (!confirm('Tem certeza que deseja remover este pagamento?')) return;
+    await paymentService.delete(id);
+    loadTransactions();
+  };
+
   const filtered = transactions.filter((t) => {
-    const matchesSearch = t.guest_name.toLowerCase().includes(search.toLowerCase()) ||
+    const matchesSearch =
+      t.guest_name.toLowerCase().includes(search.toLowerCase()) ||
       t.gift_name.toLowerCase().includes(search.toLowerCase());
     const matchesFilter = filter === 'all' || t.status === filter;
     return matchesSearch && matchesFilter;
@@ -94,7 +101,7 @@ export default function PaymentManagement() {
                 <th className="text-left px-6 py-3 text-sm font-medium text-wedding-warmgray">Valor</th>
                 <th className="text-left px-6 py-3 text-sm font-medium text-wedding-warmgray">Data</th>
                 <th className="text-left px-6 py-3 text-sm font-medium text-wedding-warmgray">Status</th>
-                <th className="text-right px-6 py-3 text-sm font-medium text-wedding-warmgray">Ação</th>
+                <th className="text-right px-6 py-3 text-sm font-medium text-wedding-warmgray">Ações</th>
               </tr>
             </thead>
             <tbody>
@@ -116,21 +123,30 @@ export default function PaymentManagement() {
                     </span>
                   </td>
                   <td className="px-6 py-4 text-right">
-                    {t.status === 'pending' ? (
+                    <div className="flex items-center justify-end gap-2">
+                      {t.status === 'pending' ? (
+                        <button
+                          onClick={() => handleUpdateStatus(t.id, 'confirmed')}
+                          className="px-3 py-1 bg-green-500 text-white rounded-lg text-xs hover:bg-green-600 transition-colors"
+                        >
+                          Confirmar
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => handleUpdateStatus(t.id, 'pending')}
+                          className="px-3 py-1 border border-wedding-gold/30 rounded-lg text-xs text-wedding-warmgray hover:bg-wedding-cream transition-colors"
+                        >
+                          Reverter
+                        </button>
+                      )}
                       <button
-                        onClick={() => handleUpdateStatus(t.id, 'confirmed')}
-                        className="px-3 py-1 bg-green-500 text-white rounded-lg text-xs hover:bg-green-600 transition-colors"
+                        onClick={() => handleDelete(t.id)}
+                        className="p-2 hover:bg-red-50 rounded-lg transition-colors text-red-400 hover:text-red-600"
+                        title="Remover pagamento"
                       >
-                        Confirmar
+                        <Trash2 size={16} />
                       </button>
-                    ) : (
-                      <button
-                        onClick={() => handleUpdateStatus(t.id, 'pending')}
-                        className="px-3 py-1 border border-wedding-gold/30 rounded-lg text-xs text-wedding-warmgray hover:bg-wedding-cream transition-colors"
-                      >
-                        Reverter
-                      </button>
-                    )}
+                    </div>
                   </td>
                 </tr>
               ))}

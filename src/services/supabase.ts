@@ -118,6 +118,11 @@ export const rsvpService = {
 
     return (data ?? []) as RSVP[];
   },
+
+  async delete(id: string): Promise<void> {
+    const { error } = await supabase.from('rsvps').delete().eq('id', id);
+    if (error) throw new Error('Erro ao deletar confirmação: ' + error.message);
+  },
 };
 
 // ------------------------------------------------------------
@@ -175,6 +180,11 @@ export const paymentService = {
     if (error) {
       throw new Error('Erro ao atualizar status: ' + error.message);
     }
+  },
+
+  async delete(id: string): Promise<void> {
+    const { error } = await supabase.from('gift_transactions').delete().eq('id', id);
+    if (error) throw new Error('Erro ao deletar transação: ' + error.message);
   },
 };
 

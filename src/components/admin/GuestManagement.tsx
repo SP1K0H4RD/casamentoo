@@ -2,16 +2,29 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { rsvpService } from '../../services/supabase';
 import type { RSVP } from '../../types';
-import { Search, Users, Calendar } from 'lucide-react';
+import { Search, Users, Calendar, Trash2 } from 'lucide-react';
 
 export default function GuestManagement() {
   const [rsvps, setRsvps] = useState<RSVP[]>([]);
   const [search, setSearch] = useState('');
 
   useEffect(() => {
-    rsvpService.getAll().then(setRsvps);
+    loadRsvps();
   }, []);
 
+  const loadRsvps = async () => {
+    const data = await rsvpService.getAll();
+    setRsvps(data);
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('Tem certeza que deseja remover esta confirmação?')) return;
+    await rsvpService.delete(id);
+    loadRsvps();
+  };
+
+  // guests_count = total de pessoas (titular + acompanhantes)
+  // acompanhantes = guests_count - 1
   const filtered = rsvps.filter((r) =>
     r.guest_name.toLowerCase().includes(search.toLowerCase())
   );
@@ -38,17 +51,19 @@ export default function GuestManagement() {
             <tr>
               <th className="text-left px-6 py-3 text-sm font-medium text-wedding-warmgray">Nome</th>
               <th className="text-left px-6 py-3 text-sm font-medium text-wedding-warmgray">Acompanhantes</th>
-              <th className="text-left px-6 py-3 text-sm font-medium text-wedding-warmgray">Total</th>
+              <th className="text-left px-6 py-3 text-sm font-medium text-wedding-warmgray">Total (c/ titular)</th>
               <th className="text-left px-6 py-3 text-sm font-medium text-wedding-warmgray">Data</th>
               <th className="text-left px-6 py-3 text-sm font-medium text-wedding-warmgray">Status</th>
+              <th className="text-right px-6 py-3 text-sm font-medium text-wedding-warmgray">Ação</th>
             </tr>
           </thead>
           <tbody>
             {filtered.map((rsvp) => (
               <tr key={rsvp.id} className="border-t border-wedding-gold/10">
-                <td className="px-6 py-4 text-wedding-charcoal">{rsvp.guest_name}</td>
-                <td className="px-6 py-4 text-wedding-warmgray">{rsvp.guests_count}</td>
-                <td className="px-6 py-4 text-wedding-charcoal font-medium">{rsvp.guests_count + 1}</td>
+                <td className="px-6 py-4 text-wedding-charcoal font-medium">{rsvp.guest_name}</td>
+                {/* acompanhantes = total - 1 (o titular) */}
+                <td className="px-6 py-4 text-wedding-warmgray">{Math.max(0, (rsvp.guests_count || 1) - 1)}</td>
+                <td className="px-6 py-4 text-wedding-charcoal font-semibold">{rsvp.guests_count || 1}</td>
                 <td className="px-6 py-4 text-wedding-warmgray text-sm">
                   {new Date(rsvp.created_at).toLocaleDateString('pt-BR')}
                 </td>
@@ -57,11 +72,20 @@ export default function GuestManagement() {
                     Confirmado
                   </span>
                 </td>
+                <td className="px-6 py-4 text-right">
+                  <button
+                    onClick={() => handleDelete(rsvp.id)}
+                    className="p-2 hover:bg-red-50 rounded-lg transition-colors text-red-400 hover:text-red-600"
+                    title="Remover confirmação"
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                </td>
               </tr>
             ))}
             {filtered.length === 0 && (
               <tr>
-                <td colSpan={5} className="px-6 py-8 text-center text-wedding-warmgray">
+                <td colSpan={6} className="px-6 py-8 text-center text-wedding-warmgray">
                   Nenhum convidado encontrado.
                 </td>
               </tr>
@@ -81,17 +105,28 @@ export default function GuestManagement() {
           >
             <div className="flex items-center justify-between">
               <h4 className="font-medium text-wedding-charcoal">{rsvp.guest_name}</h4>
-              <span className="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs">Confirmado</span>
+              <div className="flex items-center gap-2">
+                <span className="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs">Confirmado</span>
+                <button
+                  onClick={() => handleDelete(rsvp.id)}
+                  className="p-1.5 hover:bg-red-50 rounded-lg transition-colors text-red-400 hover:text-red-600"
+                >
+                  <Trash2 size={14} />
+                </button>
+              </div>
             </div>
             <div className="mt-3 grid grid-cols-2 gap-2 text-sm">
               <div className="flex items-center gap-2 text-wedding-warmgray">
                 <Users size={14} />
-                {rsvp.guests_count} acompanhantes
+                {Math.max(0, (rsvp.guests_count || 1) - 1)} acompanhantes
               </div>
               <div className="flex items-center gap-2 text-wedding-warmgray">
                 <Calendar size={14} />
                 {new Date(rsvp.created_at).toLocaleDateString('pt-BR')}
               </div>
+            </div>
+            <div className="mt-2 text-xs text-wedding-charcoal font-medium">
+              Total: {rsvp.guests_count || 1} pessoa{(rsvp.guests_count || 1) > 1 ? 's' : ''}
             </div>
           </motion.div>
         ))}
