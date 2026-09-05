@@ -37,7 +37,6 @@ export default function PixPayment({ gift, onClose }: PixPaymentProps) {
   const [copied, setCopied] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [guestName, setGuestName] = useState('');
-  const [guestEmail, setGuestEmail] = useState('');
   const [submitted, setSubmitted] = useState(false);
   const [qrDataUrl, setQrDataUrl] = useState('');
 
@@ -91,7 +90,6 @@ export default function PixPayment({ gift, onClose }: PixPaymentProps) {
     e.preventDefault();
     await paymentService.create({
       guest_name: guestName,
-      guest_email: guestEmail || undefined,
       gift_id: gift.id,
       gift_name: gift.name,
       amount: gift.value,
@@ -134,15 +132,6 @@ export default function PixPayment({ gift, onClose }: PixPaymentProps) {
             type="text"
             value={guestName}
             onChange={(e) => setGuestName(e.target.value)}
-            className="w-full px-4 py-3 border border-wedding-gold/20 rounded-xl focus:outline-none focus:border-wedding-gold"
-          />
-        </div>
-        <div>
-          <label className="block text-sm text-wedding-warmgray mb-1">E-mail (opcional)</label>
-          <input
-            type="email"
-            value={guestEmail}
-            onChange={(e) => setGuestEmail(e.target.value)}
             className="w-full px-4 py-3 border border-wedding-gold/20 rounded-xl focus:outline-none focus:border-wedding-gold"
           />
         </div>

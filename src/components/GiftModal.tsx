@@ -12,7 +12,6 @@ interface GiftModalProps {
 
 export default function GiftModal({ gift, onClose, onSuccess }: GiftModalProps) {
   const [guestName, setGuestName] = useState('');
-  const [guestEmail, setGuestEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
@@ -26,7 +25,6 @@ export default function GiftModal({ gift, onClose, onSuccess }: GiftModalProps) 
     try {
       await paymentService.create({
         guest_name: guestName.trim(),
-        guest_email: guestEmail.trim() || undefined,
         gift_id: gift.id,
         gift_name: gift.name,
         amount: gift.value,
@@ -172,19 +170,6 @@ export default function GiftModal({ gift, onClose, onSuccess }: GiftModalProps) 
                           placeholder="Ex: Ana Silva"
                           value={guestName}
                           onChange={(e) => setGuestName(e.target.value)}
-                          className="w-full px-4 py-2.5 text-sm bg-white border border-wedding-gold/25 rounded-xl focus:outline-none focus:border-wedding-gold focus:ring-1 focus:ring-wedding-gold"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-xs font-medium text-wedding-charcoal mb-1">
-                          Seu E-mail (opcional)
-                        </label>
-                        <input
-                          type="email"
-                          placeholder="seu@email.com"
-                          value={guestEmail}
-                          onChange={(e) => setGuestEmail(e.target.value)}
                           className="w-full px-4 py-2.5 text-sm bg-white border border-wedding-gold/25 rounded-xl focus:outline-none focus:border-wedding-gold focus:ring-1 focus:ring-wedding-gold"
                         />
                       </div>

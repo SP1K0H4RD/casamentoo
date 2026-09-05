@@ -18,7 +18,7 @@ export default function PixPodiumModal({ onClose }: PixPodiumModalProps) {
   const [copied, setCopied] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const pixKey = weddingConfig.pixKey || '12345678900';
+  const pixKey = weddingConfig.pixKey || '89994189841';
 
   const handleValueSubmit = (e: React.FormEvent) => {
     e.preventDefault();

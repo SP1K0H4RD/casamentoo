@@ -10,7 +10,7 @@ export const weddingConfig: WeddingConfig = {
   venueAddress: 'Av. Senador Helvídio Nunes, 1485 - Catavento, Picos - PI',
   latitude: -7.0772,
   longitude: -41.4674,
-  pixKey: '12345678900',
+  pixKey: '89994189841',
   pixName: 'Matheus e Ângela',
   pixCity: 'PICOS',
 };
@@ -42,9 +42,9 @@ export const manualCards = [
   },
   {
     id: 'cerimonia_recepcao',
-    title: 'Cerimônia e Festa Integradas',
+    title: 'Recepção e Cerimônia Integrados',
     icon: 'sparkles',
-    content: 'Para o seu conforto, tanto a celebração religiosa quanto a festa e recepção acontecerão no mesmo local (Espaço Celebre PH).',
+    content: 'Para o seu conforto, tanto a celebração religiosa quanto a recepção acontecerão no mesmo local (Espaço Celebre PH).',
   },
   {
     id: 'confirmacao',
