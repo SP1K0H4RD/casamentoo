@@ -67,7 +67,7 @@ export default function EventLocation() {
                 </div>
                 <div>
                   <p className="text-xs text-wedding-warmgray uppercase tracking-wider font-semibold">Horário da Cerimônia</p>
-                  <p className="text-wedding-charcoal font-serif text-base">19h00 (Início pontual)</p>
+                  <p className="text-wedding-charcoal font-serif text-base">18:30h (Início pontual)</p>
                 </div>
               </div>
 
@@ -76,8 +76,8 @@ export default function EventLocation() {
                   <Sparkles size={20} />
                 </div>
                 <div>
-                  <p className="text-xs text-wedding-warmgray uppercase tracking-wider font-semibold">Recepção & Festa</p>
-                  <p className="text-wedding-charcoal font-serif text-base">Logo após a cerimônia no mesmo local</p>
+                  <p className="text-xs text-wedding-warmgray uppercase tracking-wider font-semibold">Recepção & Cerimônia</p>
+                  <p className="text-wedding-charcoal font-serif text-base">No mesmo local</p>
                 </div>
               </div>
             </div>

@@ -50,7 +50,7 @@ export default function GuestManagement() {
           <thead className="bg-wedding-cream">
             <tr>
               <th className="text-left px-6 py-3 text-sm font-medium text-wedding-warmgray">Nome</th>
-              <th className="text-left px-6 py-3 text-sm font-medium text-wedding-warmgray">Acompanhantes</th>
+              <th className="text-left px-6 py-3 text-sm font-medium text-wedding-warmgray">Componentes da Família</th>
               <th className="text-left px-6 py-3 text-sm font-medium text-wedding-warmgray">Total (c/ titular)</th>
               <th className="text-left px-6 py-3 text-sm font-medium text-wedding-warmgray">Data</th>
               <th className="text-left px-6 py-3 text-sm font-medium text-wedding-warmgray">Status</th>
@@ -61,7 +61,7 @@ export default function GuestManagement() {
             {filtered.map((rsvp) => (
               <tr key={rsvp.id} className="border-t border-wedding-gold/10">
                 <td className="px-6 py-4 text-wedding-charcoal font-medium">{rsvp.guest_name}</td>
-                {/* acompanhantes = total - 1 (o titular) */}
+                {/* componentes da família = total - 1 (o titular) */}
                 <td className="px-6 py-4 text-wedding-warmgray">{Math.max(0, (rsvp.guests_count || 1) - 1)}</td>
                 <td className="px-6 py-4 text-wedding-charcoal font-semibold">{rsvp.guests_count || 1}</td>
                 <td className="px-6 py-4 text-wedding-warmgray text-sm">
@@ -118,7 +118,7 @@ export default function GuestManagement() {
             <div className="mt-3 grid grid-cols-2 gap-2 text-sm">
               <div className="flex items-center gap-2 text-wedding-warmgray">
                 <Users size={14} />
-                {Math.max(0, (rsvp.guests_count || 1) - 1)} acompanhantes
+                {Math.max(0, (rsvp.guests_count || 1) - 1)} componentes da família
               </div>
               <div className="flex items-center gap-2 text-wedding-warmgray">
                 <Calendar size={14} />

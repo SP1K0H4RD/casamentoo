@@ -85,7 +85,7 @@ export default function RSVPForm() {
               </p>
               {companions.filter(Boolean).length > 0 && (
                 <div className="mt-4 p-4 bg-white/70 rounded-2xl border border-wedding-gold/15 text-xs text-wedding-charcoal/80 text-left">
-                  <p className="font-semibold text-wedding-gold mb-1 uppercase tracking-wider">Acompanhantes confirmados:</p>
+                  <p className="font-semibold text-wedding-gold mb-1 uppercase tracking-wider">Componentes da família confirmados:</p>
                   <ul className="list-disc list-inside space-y-0.5">
                     {companions.filter(Boolean).map((c, i) => (
                       <li key={i}>{c}</li>
@@ -137,7 +137,7 @@ export default function RSVPForm() {
                 <div className="flex items-center justify-between mb-3">
                   <label className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-wedding-charcoal/70">
                     <Users size={15} className="text-wedding-gold" />
-                    Acompanhantes ({companions.length})
+                    Componentes da família ({companions.length})
                   </label>
                   <button
                     type="button"
@@ -145,13 +145,13 @@ export default function RSVPForm() {
                     className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-wedding-gold/15 hover:bg-wedding-gold/25 text-wedding-gold-dark font-medium text-xs rounded-lg transition-colors cursor-pointer"
                   >
                     <Plus size={14} />
-                    <span>Adicionar Acompanhante</span>
+                    <span>Adicionar Componente da Família</span>
                   </button>
                 </div>
 
                 {companions.length === 0 ? (
                   <p className="text-xs text-wedding-warmgray/80 italic bg-white/50 p-3 rounded-xl border border-dashed border-wedding-gold/20 text-center">
-                    Vai acompanhado(a)? Clique no botão acima para informar o nome de quem irá com você.
+                    Vai acompanhado(a)? Clique no botão acima para informar os componentes da família que irão com você.
                   </p>
                 ) : (
                   <div className="space-y-3">
@@ -168,7 +168,7 @@ export default function RSVPForm() {
                             type="text"
                             value={compName}
                             onChange={(e) => handleCompanionNameChange(index, e.target.value)}
-                            placeholder={`Nome completo do acompanhante ${index + 1}`}
+                            placeholder={`Nome completo do componente da família ${index + 1}`}
                             className="w-full px-4 py-3 bg-white border border-wedding-gold/25 rounded-xl focus:outline-none focus:border-wedding-gold focus:ring-2 focus:ring-wedding-gold/20 transition-all text-sm text-wedding-charcoal"
                           />
                         </div>
@@ -176,7 +176,7 @@ export default function RSVPForm() {
                           type="button"
                           onClick={() => handleRemoveCompanion(index)}
                           className="p-3 text-wedding-warmgray hover:text-red-500 hover:bg-red-50 rounded-xl transition-colors cursor-pointer"
-                          title="Remover acompanhante"
+                          title="Remover componente da família"
                         >
                           <Trash2 size={16} />
                         </button>

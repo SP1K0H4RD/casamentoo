@@ -4,7 +4,7 @@ export const weddingConfig: WeddingConfig = {
   groomName: 'Matheus Pacífico',
   brideName: 'Ângela Tributino',
   date: '2026-12-16',
-  ceremonyTime: '19:00',
+  ceremonyTime: '18:30',
   receptionTime: 'A seguir (mesmo local)',
   venueName: 'Espaço Celebre PH do Picos Hotel',
   venueAddress: 'Av. Senador Helvídio Nunes, 1485 - Catavento, Picos - PI',
@@ -26,7 +26,7 @@ export const manualCards = [
     id: 'horario',
     title: 'Horário & Pontualidade',
     icon: 'clock',
-    content: 'A celebração iniciará pontualmente às 19h no Espaço Celebre PH. Pedimos a gentileza de chegar com 20 a 30 minutos de antecedência.',
+    content: 'A celebração iniciará pontualmente às 18:30h no Espaço Celebre PH. Pedimos a gentileza de chegar com 20 a 30 minutos de antecedência.',
   },
   {
     id: 'estacionamento',

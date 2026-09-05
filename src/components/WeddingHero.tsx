@@ -68,7 +68,7 @@ export default function WeddingHero() {
           <div className="w-16 h-0.5 bg-wedding-gold/60 mx-auto mb-6" />
           <div className="space-y-4 font-script text-xl sm:text-2xl md:text-[26px] text-wedding-charcoal/90 italic leading-relaxed text-center tracking-wide font-normal">
             <p>
-              “Esse é o dia que Deus preparou pra nós, e por essa razão estamos felizes.
+              “Esse é o dia que Deus preparou para nós, e por essa razão estamos felizes.
             </p>
             <p>
               O amor é um sentimento que procede de Cristo, pois Ele é o próprio amor, portanto encontrar alguém a quem você ama e escolher passar a vida com essa pessoa é uma dádiva.
