@@ -1,9 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import type { Gift } from '../types';
 import { paymentService } from '../services/supabase';
 import { weddingConfig } from '../config/weddingConfig';
-import { Copy, Check, QrCode } from 'lucide-react';
+import { Copy, Check } from 'lucide-react';
 
 interface PixPaymentProps {
   gift: Gift;
@@ -38,7 +38,6 @@ export default function PixPayment({ gift, onClose }: PixPaymentProps) {
   const [showForm, setShowForm] = useState(false);
   const [guestName, setGuestName] = useState('');
   const [submitted, setSubmitted] = useState(false);
-  const [qrDataUrl, setQrDataUrl] = useState('');
 
   const pixCode = generatePixCode(
     weddingConfig.pixKey,
@@ -47,38 +46,6 @@ export default function PixPayment({ gift, onClose }: PixPaymentProps) {
     gift.value,
     gift.name
   );
-
-  useEffect(() => {
-    // Generate a simple QR code using a data URL
-    // In production, use a proper QR code library
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-    if (ctx) {
-      canvas.width = 200;
-      canvas.height = 200;
-      ctx.fillStyle = 'white';
-      ctx.fillRect(0, 0, 200, 200);
-      ctx.fillStyle = 'black';
-      // Simple pattern to simulate QR code
-      for (let i = 0; i < 25; i++) {
-        for (let j = 0; j < 25; j++) {
-          if (Math.random() > 0.5) {
-            ctx.fillRect(i * 8, j * 8, 8, 8);
-          }
-        }
-      }
-      // Add position markers
-      ctx.fillStyle = 'black';
-      [[0,0], [17,0], [0,17]].forEach(([x, y]) => {
-        ctx.fillRect(x * 8, y * 8, 24, 24);
-        ctx.fillStyle = 'white';
-        ctx.fillRect(x * 8 + 4, y * 8 + 4, 16, 16);
-        ctx.fillStyle = 'black';
-        ctx.fillRect(x * 8 + 8, y * 8 + 8, 8, 8);
-      });
-      setQrDataUrl(canvas.toDataURL());
-    }
-  }, [gift]);
 
   const handleCopy = () => {
     navigator.clipboard.writeText(pixCode);
@@ -156,13 +123,9 @@ export default function PixPayment({ gift, onClose }: PixPaymentProps) {
   return (
     <div className="space-y-6">
       <div className="text-center">
-        {qrDataUrl ? (
-          <img src={qrDataUrl} alt="QR Code PIX" className="w-48 h-48 mx-auto rounded-xl" />
-        ) : (
-          <div className="w-48 h-48 mx-auto bg-wedding-cream rounded-xl flex items-center justify-center">
-            <QrCode size={64} className="text-wedding-gold/40" />
-          </div>
-        )}
+        <div className="w-48 h-48 mx-auto bg-white p-2 rounded-2xl border border-wedding-gold/30 shadow-md flex items-center justify-center overflow-hidden">
+          <img src="/pix-qrcode.png" alt="QR Code PIX" className="w-full h-full object-contain" />
+        </div>
         <p className="text-wedding-warmgray text-sm mt-3">Escaneie com o app do seu banco</p>
       </div>
 

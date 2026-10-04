@@ -887,7 +887,9 @@
 
         <!-- QR CODE & PIX KEY BOX -->
         <div class="bg-wedding-cream/60 rounded-2xl p-4 sm:p-5 border border-wedding-gold/25 mb-4 text-center">
-          <div id="podium-qrcode" class="w-40 h-40 mx-auto bg-white p-2.5 rounded-xl border border-wedding-gold/20 shadow-inner flex items-center justify-center mb-3"></div>
+          <div id="podium-qrcode" class="w-44 h-44 mx-auto bg-white p-2 rounded-2xl border border-wedding-gold/30 shadow-md flex items-center justify-center mb-3 overflow-hidden">
+            <img src="./pix-qrcode.png" alt="QR Code PIX Oficial" class="w-full h-full object-contain" />
+          </div>
 
           <p class="text-[11px] text-wedding-warmgray mb-1">
             Chave PIX: <strong class="text-wedding-charcoal font-mono select-all text-xs">89994189841</strong>
@@ -992,7 +994,9 @@
       <p class="text-wedding-gold font-serif text-2xl font-bold mb-4" id="pix-modal-value">R$ 0,00</p>
       
       <div class="bg-wedding-cream p-4 rounded-2xl mb-4 border border-wedding-gold/20">
-        <div id="pix-qrcode" class="w-44 h-44 mx-auto bg-white p-2 rounded-xl shadow-inner flex items-center justify-center"></div>
+        <div id="pix-qrcode" class="w-44 h-44 mx-auto bg-white p-2 rounded-2xl border border-wedding-gold/30 shadow-inner flex items-center justify-center overflow-hidden">
+          <img src="./pix-qrcode.png" alt="QR Code PIX Oficial" class="w-full h-full object-contain" />
+        </div>
       </div>
       <p class="text-wedding-warmgray text-xs mb-3">Chave PIX: <strong class="text-wedding-charcoal font-mono">89994189841</strong></p>
       <p class="text-wedding-warmgray text-xs mb-4">Favorecido: <strong class="text-wedding-charcoal">Matheus e Ângela</strong></p>
@@ -1798,10 +1802,7 @@ function selectPixPodiumTier(amount, label) {
     function renderPixQrCode(elementId, value) {
       const qrContainer = document.getElementById(elementId);
       if (!qrContainer) return;
-      qrContainer.innerHTML = '';
-      QRCode.toCanvas(document.createElement('canvas'), `00020126360014BR.GOV.BCB.PIX0114+558999999999520400005303986540${value}.005802BR5917Matheus e Angela6005PICOS62070503***6304`, { width: 150 }, function (error, canvas) {
-        if (!error && canvas) qrContainer.appendChild(canvas);
-      });
+      qrContainer.innerHTML = '<img src="./pix-qrcode.png" alt="QR Code PIX Oficial" class="w-full h-full object-contain" />';
     }
 
     function confirmPodiumPayment() {

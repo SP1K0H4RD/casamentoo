@@ -157,10 +157,10 @@ export default function PixPodiumModal({ onClose }: PixPodiumModalProps) {
 
             {/* PIX KEY BOX */}
             <div className="bg-wedding-cream/60 rounded-2xl p-4 sm:p-5 border border-wedding-gold/25 mb-4 text-center">
-              <div className="w-40 h-40 mx-auto bg-white p-2.5 rounded-xl border border-wedding-gold/20 shadow-inner flex items-center justify-center mb-3">
+              <div className="w-44 h-44 mx-auto bg-white p-2 rounded-2xl border border-wedding-gold/30 shadow-md flex items-center justify-center mb-3 overflow-hidden">
                 <img
-                  src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(pixKey)}`}
-                  alt="QR Code PIX"
+                  src="/pix-qrcode.png"
+                  alt="QR Code PIX Oficial"
                   className="w-full h-full object-contain"
                 />
               </div>
