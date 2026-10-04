@@ -319,13 +319,31 @@
         </div>
 
         <!-- Couple Photo Slideshow Carousel -->
-        <div class="mt-10 w-full max-w-xl mx-auto px-4 sm:px-6 select-none">
-          <div class="flex items-center justify-center gap-2 mb-4 text-wedding-gold">
-            <i data-lucide="sparkles" class="w-4 h-4"></i>
-            <span class="font-serif uppercase tracking-[0.2em] text-xs font-semibold text-wedding-charcoal/80">
-              Nossa História em Fotos
-            </span>
-            <i data-lucide="sparkles" class="w-4 h-4"></i>
+        <div id="photo-carousel-container" class="mt-10 w-full max-w-xl mx-auto px-4 sm:px-6 select-none">
+          <div class="flex items-center justify-between mb-4 px-1">
+            <div class="flex items-center gap-1.5 text-wedding-gold">
+              <i data-lucide="sparkles" class="w-4 h-4"></i>
+              <span class="font-serif uppercase tracking-[0.2em] text-xs font-semibold text-wedding-charcoal/80">
+                Nossa História em Fotos
+              </span>
+            </div>
+
+            <!-- Audio status toggle button -->
+            <button
+              type="button"
+              id="carousel-btn-audio-toggle"
+              onclick="toggleCarouselAudio()"
+              aria-label="Ativar ou silenciar música"
+              class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/90 border border-wedding-gold/30 text-wedding-charcoal hover:text-wedding-gold shadow-sm backdrop-blur-sm text-[11px] font-medium transition-all hover:scale-105 active:scale-95 cursor-pointer"
+            >
+              <span id="carousel-audio-icon"><i data-lucide="volume-2" class="w-3.5 h-3.5 text-wedding-gold"></i></span>
+              <span id="carousel-audio-text" class="text-wedding-gold font-medium hidden sm:inline">Música</span>
+              <span id="carousel-audio-waves" class="hidden items-center gap-0.5 ml-0.5">
+                <span class="w-0.5 h-2.5 bg-wedding-gold rounded-full animate-bounce"></span>
+                <span class="w-0.5 h-3.5 bg-wedding-gold rounded-full animate-bounce" style="animation-delay: 150ms;"></span>
+                <span class="w-0.5 h-2 bg-wedding-gold rounded-full animate-bounce" style="animation-delay: 300ms;"></span>
+              </span>
+            </button>
           </div>
 
           <!-- Carousel Container with Outer Lateral Arrows -->
@@ -1949,6 +1967,99 @@ function selectPixPodiumTier(amount, label) {
       }
     }
 
+    // Audio Background on Scroll Logic
+    let carouselAudio = null;
+    let isAudioMuted = false;
+    let isCarouselVisible = false;
+    let isAudioPlaying = false;
+
+    function initCarouselAudio() {
+      carouselAudio = new Audio('./wedding-song.mp3');
+      carouselAudio.loop = true;
+      carouselAudio.preload = 'auto';
+
+      const unlockAudio = () => {
+        if (isCarouselVisible && carouselAudio && !isAudioMuted) {
+          carouselAudio.play().then(() => {
+            setAudioPlayingState(true);
+          }).catch(() => {});
+        }
+        window.removeEventListener('click', unlockAudio);
+        window.removeEventListener('scroll', unlockAudio);
+        window.removeEventListener('touchstart', unlockAudio);
+      };
+
+      window.addEventListener('click', unlockAudio, { passive: true });
+      window.addEventListener('scroll', unlockAudio, { passive: true });
+      window.addEventListener('touchstart', unlockAudio, { passive: true });
+
+      // Intersection Observer
+      const container = document.getElementById('photo-carousel-container');
+      if (container && 'IntersectionObserver' in window) {
+        const observer = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              isCarouselVisible = true;
+              if (carouselAudio && !isAudioMuted) {
+                carouselAudio.currentTime = 0; // Starts from beginning as requested
+                const promise = carouselAudio.play();
+                if (promise !== undefined) {
+                  promise.then(() => setAudioPlayingState(true)).catch(() => setAudioPlayingState(false));
+                }
+              }
+            } else {
+              isCarouselVisible = false;
+              if (carouselAudio) {
+                carouselAudio.pause();
+                carouselAudio.currentTime = 0; // Stops and resets
+                setAudioPlayingState(false);
+              }
+            }
+          });
+        }, { threshold: 0.25 });
+        observer.observe(container);
+      }
+    }
+
+    function setAudioPlayingState(playing) {
+      isAudioPlaying = playing;
+      const waves = document.getElementById('carousel-audio-waves');
+      const icon = document.getElementById('carousel-audio-icon');
+      if (waves) {
+        if (playing && !isAudioMuted) {
+          waves.classList.remove('hidden');
+          waves.classList.add('flex');
+        } else {
+          waves.classList.add('hidden');
+          waves.classList.remove('flex');
+        }
+      }
+      if (icon) {
+        if (isAudioMuted) {
+          icon.innerHTML = '<i data-lucide="volume-x" class="w-3.5 h-3.5 text-wedding-warmgray"></i>';
+        } else {
+          icon.innerHTML = `<i data-lucide="volume-2" class="w-3.5 h-3.5 ${playing ? 'text-wedding-gold animate-pulse' : 'text-wedding-gold'}"></i>`;
+        }
+        if (window.lucide) lucide.createIcons();
+      }
+    }
+
+    function toggleCarouselAudio() {
+      if (!carouselAudio) return;
+      isAudioMuted = !isAudioMuted;
+      carouselAudio.muted = isAudioMuted;
+      const text = document.getElementById('carousel-audio-text');
+      if (isAudioMuted) {
+        if (text) { text.textContent = 'Mudo'; text.className = 'text-wedding-warmgray hidden sm:inline'; }
+        setAudioPlayingState(false);
+      } else {
+        if (text) { text.textContent = 'Música'; text.className = 'text-wedding-gold font-medium hidden sm:inline'; }
+        if (isCarouselVisible) {
+          carouselAudio.play().then(() => setAudioPlayingState(true)).catch(() => {});
+        }
+      }
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
       const prevBtn = document.getElementById('carousel-btn-prev');
       const nextBtn = document.getElementById('carousel-btn-next');
@@ -1976,6 +2087,7 @@ function selectPixPodiumTier(amount, label) {
 
       updatePhotoCarousel();
       resetPhotoTimer();
+      initCarouselAudio();
     });
   </script>
 </body>
