@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import { weddingConfig } from '../config/weddingConfig';
 import { ChevronDown, Sparkles } from 'lucide-react';
+import PhotoCarousel from './PhotoCarousel';
 
 export default function WeddingHero() {
   return (
@@ -76,6 +77,9 @@ export default function WeddingHero() {
           </div>
           <div className="w-16 h-0.5 bg-wedding-gold/60 mx-auto mt-6" />
         </motion.div>
+
+        {/* Couple Photo Slideshow Gallery */}
+        <PhotoCarousel autoPlayInterval={4000} />
       </div>
 
       {/* Scroll Down Hint */}
