@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { weddingConfig } from '../config/weddingConfig';
-import { ChevronDown, Heart, Sparkles } from 'lucide-react';
+import { ChevronDown, Sparkles } from 'lucide-react';
 
 export default function WeddingHero() {
   return (
@@ -12,25 +12,19 @@ export default function WeddingHero() {
       </div>
 
       <div className="relative z-10 text-center px-6 max-w-3xl mx-auto">
-        {/* Photo Card / Monogram Frame */}
+        {/* Photo Card */}
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.9 }}
-          className="mb-8 mx-auto w-64 h-80 sm:w-72 sm:h-96 rounded-3xl overflow-hidden bg-wedding-beige border-4 border-white shadow-2xl relative"
+          className="mb-8 mx-auto w-64 h-80 sm:w-72 sm:h-96 rounded-3xl overflow-hidden bg-wedding-beige border-4 border-white shadow-2xl relative group"
         >
-          <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-[#FAF7F2] via-[#F5EFE6] to-[#EAE0D0] p-6">
-            <motion.div
-              animate={{ rotate: [0, 5, -5, 0] }}
-              transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
-              className="w-20 h-20 rounded-2xl bg-wedding-gold/15 border border-wedding-gold/30 flex items-center justify-center mb-4 shadow-inner"
-            >
-              <Heart className="text-wedding-gold fill-wedding-gold/20" size={36} />
-            </motion.div>
-            <h3 className="font-serif text-2xl text-wedding-charcoal">M <span className="text-wedding-gold">&</span> Â</h3>
-            <p className="text-wedding-gold text-xs tracking-widest uppercase mt-2 font-medium">16 . 12 . 2026</p>
-            <p className="text-wedding-warmgray text-[11px] mt-4 uppercase tracking-wider">Espaço Celebre PH • Picos - PI</p>
-          </div>
+          <img
+            src="/oficial.jpg"
+            alt={`${weddingConfig.groomName} & ${weddingConfig.brideName}`}
+            className="w-full h-full object-cover object-center transition-transform duration-700 ease-out group-hover:scale-105"
+            loading="eager"
+          />
         </motion.div>
 
         {/* Couple Names */}
