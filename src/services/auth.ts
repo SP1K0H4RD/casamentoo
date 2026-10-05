@@ -1,7 +1,7 @@
 // Gerenciador de Autenticação - Senhas protegidas via variáveis de ambiente
 export const authService = {
   getGuestPassword(): string {
-    return (import.meta.env.VITE_GUEST_PASSWORD || 'CASAMENTO2026').trim();
+    return (import.meta.env.VITE_GUEST_PASSWORD || 'MATHEUSEANGELA16').trim();
   },
 
   getAdminPassword(): string {

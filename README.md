@@ -66,7 +66,7 @@ export const weddingConfig: WeddingConfig = {
   venueAddress: 'R. da Conceição, 123',
   latitude: -3.7327,            // Coordenadas para o mapa
   longitude: -38.5270,
-  guestPassword: 'CASAMENTO2026', // Senha dos convidados
+  guestPassword: 'MATHEUSEANGELA16', // Senha dos convidados
   adminPassword: 'ADMIN123',      // Senha do painel admin
   pixKey: '12345678900',          // Chave PIX
   pixName: 'Renata e Gean',
@@ -93,7 +93,7 @@ Substitua os placeholders nos componentes:
 VITE_SUPABASE_URL=https://seu-projeto.supabase.co
 VITE_SUPABASE_ANON_KEY=sua-chave-anon
 VITE_ADMIN_PASSWORD=ADMIN123
-VITE_GUEST_PASSWORD=CASAMENTO2026
+VITE_GUEST_PASSWORD=MATHEUSEANGELA16
 ```
 
 ## 🗄️ Supabase — Configuração do Banco
